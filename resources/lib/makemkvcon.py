@@ -19,8 +19,8 @@
 # Global imports
 import os, sys, time
 import urllib, re
-import subprocess
 import xbmc, xbmcaddon
+from subprocess import Popen, PIPE, call
 
 # Local imports
 import plugin
@@ -33,22 +33,13 @@ __addonname__ = __addon__.getAddonInfo('name')
 MAKEMKVCON = None
 
 #
-# Get binary path
-#
-def bin_path ():
-  path = plugin.get('makemkvcon_path')
-  if not path:
-    path = 'makemkvcon'
-  return path
-
-#
 # Check binary is installed
 #
 def installed ():
-  path = bin_path()
+  path = plugin.get('makemkvcon_path', 'makemkvcon')
   plugin.log('makemkvcon_path = %s' % path)
   try:
-    p = subprocess.Popen(path, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = Popen(path, stdout=PIPE, stderr=PIPE)
     p = None
     return True
   except Exception, e:
@@ -59,31 +50,42 @@ def installed ():
 # Kill instances
 #
 def kill ():
-  return
+  global MAKEMKVCON
   if MAKEMKVCON:
     MAKEMKVCON.kill()
     MAKEMKVCON = None
-  subprocess.call('killall -9 makemkvcon', shell=True)
-  subprocess.call('killall -9 makemkvcon.bin', shell=True)
+  cmd = [ 'killall', '-KILL', 'makemkvcon' ]
+  call(cmd)
+  cmd[2] = cmd[2] + '.bin'
+  call(cmd)
 
 #
 # Stream disc
 #
+# TODO: configurable disc number?
+#
 def start ():
-  return
+  global MAKEMKVCON
   if MAKEMKVCON:
-    pass # TODO error
     return
-  cmd        = bin_path()
-  cmd        = [ cmd, '-r', '--cache=128', 'disc:0' ]
-  MAKEMKVCON = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+  cmd        = plugin.get('makemkvcon_path', 'makemkvcon')
+  cmd        = [ cmd, '-r', '--cache=128', 'stream', 'disc:0' ]
+  MAKEMKVCON = Popen(cmd, stdout=PIPE, stderr=PIPE)
   return
 
 #
 # Check if stream is ready
 #
 def ready ():
+  global MAKEMKVCON
   if not MAKEMKVCON: return False
-  # TODO: wait for output
-  # TODO: check port
+  host = plugin.get('makemkv_host', 'localhost')
+  port = int(plugin.get('makemkv_port', 51000))
+  try:
+    up   = urllib.urlopen('http://%s:%d' % (host, port))
+    up.close()
+    return True
+  except Exception, e:
+    #plugin.log('ERROR: %s' % e)
+    pass
   return False

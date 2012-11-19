@@ -33,6 +33,9 @@ sys.path.append(xbmc.translatePath(os.path.join(__cwd__, 'resources', 'lib')))
 import plugin, makemkv, makemkvcon
 plugin.log('starting service')
 
+# Settings
+BDDIR = 'BDMV'
+
 # Check for makemkvcon
 if not makemkvcon.installed():
   plugin.notify(plugin.lang(50001))
@@ -43,6 +46,7 @@ disc_current = None
 disc_started = 0
 disc_ready   = False
 while not xbmc.abortRequested:
+  plugin.log('run')
 
   # Update fixed key
   key = plugin.get('license_key')
@@ -60,7 +64,7 @@ while not xbmc.abortRequested:
 
   # Disc removed
   if disc_current:
-    path = os.path.join('/media', disc_current, 'BDMV')
+    path = os.path.join('/media', disc_current, BDDIR)
     if not os.path.exists(path):
       plugin.notify(plugin.lang(50005) % disc_current)
       makemkvcon.kill()
@@ -82,14 +86,15 @@ while not xbmc.abortRequested:
     # Check for new
     else:
       for d in os.listdir('/media'):
-        p = os.path.join('/media', d, 'BDMV')
+        p = os.path.join('/media', d, BDDIR)
         if os.path.exists(p):
           try:
             makemkvcon.start()
             disc_current = d
             disc_started = time.time()
             plugin.notify(plugin.lang(50003) % disc_current)
-          except: pass
+          except Exception, e:
+            plugin.log('ERROR: %s' % e)
           break
 
     # Wait

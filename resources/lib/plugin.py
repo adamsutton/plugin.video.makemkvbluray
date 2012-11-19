@@ -47,7 +47,7 @@ def notify ( msg, image = "", timeout = 3000 ):
 #
 def get ( key, default = None ):
   val = __addon__.getSetting(key)
-  if val is None: val = default
+  if val is None or val == '': val = default
   return val
 
 #
