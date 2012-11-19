@@ -100,4 +100,4 @@ while not xbmc.abortRequested:
           break
 
     # Wait
-  time.sleep(5)
+  xbmc.sleep(5)
