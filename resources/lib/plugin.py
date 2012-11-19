@@ -22,7 +22,7 @@ import xbmc, xbmcaddon
 
 # Addon info
 __addon__     = xbmcaddon.Addon()
-__addonname__ = __addon__.getAddonInfo('name')
+__addonid__   = __addon__.getAddonInfo('id')
 __addonname__ = __addon__.getAddonInfo('name')
 __author__    = __addon__.getAddonInfo('author')
 __version__   = __addon__.getAddonInfo('version')
@@ -55,3 +55,11 @@ def get ( key, default = None ):
 #
 def lang ( key ):
   return __addon__.getLocalizedString(key)
+
+#
+# Start the plugin (called from service)
+#
+def start ():
+  cmd = 'RunAddon("%s")' % __addonid__
+  log(cmd)
+  xbmc.executebuiltin(cmd)

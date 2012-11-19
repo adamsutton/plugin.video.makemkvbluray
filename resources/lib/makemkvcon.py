@@ -74,18 +74,81 @@ def start ():
   return
 
 #
+# Get remote address
+#
+def getHostPort ():
+  host = plugin.get('makemkv_host', 'localhost')
+  port = int(plugin.get('makemkv_port', 51000))
+  return 'http://%s:%d' % (host, port)
+
+#
+# Connect
+#
+def connect ( path = '/' ):
+  return urllib.urlopen(getHostPort() + path)
+
+#
 # Check if stream is ready
 #
 def ready ():
   global MAKEMKVCON
   if not MAKEMKVCON: return False
-  host = plugin.get('makemkv_host', 'localhost')
-  port = int(plugin.get('makemkv_port', 51000))
   try:
-    up   = urllib.urlopen('http://%s:%d' % (host, port))
+    up = connect()
     up.close()
     return True
   except Exception, e:
     #plugin.log('ERROR: %s' % e)
     pass
   return False
+
+#
+# Fetch URL and extra key/val data
+#
+def fetchUrl ( path ):
+  ret = {}
+  exp = re.compile('<tr><td>(.*?)</td><td>(.*?)</td></tr>')
+  up  = connect(path)
+  for l in up:
+    r = exp.search(l)
+    if r:
+      ret[r.group(1)] = r.group(2)
+  return ret
+
+#
+# List individual title
+#
+def listTitle(num):
+  ret = {}
+  dat = fetchUrl('/web/title%d' % num)
+  if 'duration' in dat:
+    p = dat['duration'].split(':')
+    ret['duration'] = dat['duration']
+    ret['length']   = (int(p[0]) * 3600) + (int(p[1]) * 60) + int(p[2])
+  for k in [ 'formatcount', 'chaptercount', 'id' ]:
+    if k in dat:
+      ret[k] = int(dat[k])
+  exp = re.compile('">([^<]*)')
+  for k in dat:
+    if k.startswith('file'):
+      r = exp.search(dat[k])
+      if r:
+        ret[k] = getHostPort() + r.group(1)
+  return ret
+
+#
+# Fetch all titles
+#
+def listTitles():
+
+  # Get title count
+  dat = fetchUrl('/web/titles')
+  num = 0
+  if 'titlecount' in dat:
+    num = int(dat['titlecount'])
+
+  # Process each title
+  ret = []
+  for t in range(num):
+    ret.append(listTitle(t))
+  return ret

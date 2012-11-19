@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-	<setting type="lsep" label="51030"/>
-	<setting id="disc_autoload"       type="bool" label="51031" default="true"/>
+  <setting type="lsep" label="51030"/>
+  <setting id="disc_autoload"       type="bool"   label="51031" default="true"/>
   <setting id="disc_timeout"        type="number" label="51032" default="600"/>
-  
-	<setting type="lsep" label="51020"/>
-	<setting id="license_key"         type="text" label="51021" default="" />
-	<setting id="license_beta_auto"   type="bool" label="51022" default="false" />
-	<setting id="license_beta_period" type="labelenum" label="51023" default="5" values="1|2|4|6|12|24" />
+  <setting id="disc_autostart"      type="bool"   label="51033" default="true"/>
+  <setting id="disc_autoplay"       type="bool"   label="51034" default="true"/>
+
+  <setting type="lsep" label="51020"/>
+  <setting id="license_key"         type="text" label="51021" default="" />
+  <setting id="license_beta_auto"   type="bool" label="51022" default="false" />
+  <setting id="license_beta_period" type="labelenum" label="51023" default="5" values="1|2|4|6|12|24" />
 </settings>

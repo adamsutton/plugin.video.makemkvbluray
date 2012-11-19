@@ -79,6 +79,8 @@ while not xbmc.abortRequested:
       if makemkvcon.ready():
         disc_ready = True
         plugin.notify(plugin.lang(50004) % disc_current)
+        if plugin.get('disc_autostart'):
+          plugin.start()
       elif (time.time() - disc_started) > int(plugin.get('disc_timeout')):
         plugin.notify(plugin.lang(50006) % disc_current)
         disc_ready = True # stop watching
