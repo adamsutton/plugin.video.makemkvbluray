@@ -1,0 +1,19 @@
+<strings>
+  <!-- Notifications -->
+  <string id="50001">makemkvcon binary not installed.</string>
+  <string id="50002">makemkv beta key updated.</string>
+  <string id="50003">Disc %s inserted</string>
+  <string id="50004">Disc %s ready</string>
+  <string id="50005">Disc %s removed</string>
+  <string id="50006">Disc %s timed out</string>
+
+  <!-- Settings -->
+  <string id="51010">General Settings</string>
+  <string id="51020">License Settings</string>
+  <string id="51021">Key</string>
+  <string id="51022">Beta key auto-update</string>
+  <string id="51023">Beta key update period (hours)</string>
+  <string id="51030">Disc Settings</string>
+  <string id="51031">Auto load</string>
+  <string id="51032">Timeout (seconds)</string>
+</strings>
