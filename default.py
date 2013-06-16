@@ -75,18 +75,20 @@ if not makemkvcon.installed():
   sys.exit(1)
 
 # Start
-if not plugin.get('disc_autoload'):
-  makemkvcon.start()
+#if not plugin.get('disc_autoload'):
+makemkvcon.start()
     
 # Check that service is running
 st = time.time()
 ok = False
-# TODO: dialog
-while (time.time() - st) < int(plugin.get('disc_timeout')):
+plugin.log('waiting for makemkvcon')
+while not ok and (time.time() - st) < int(plugin.get('disc_timeout')):
   ok = makemkvcon.ready()
+  xbmc.sleep(100)
 if not ok:
   plugin.notify(plugin.lang(50006))
   sys.exit(1)
+plugin.log('makemkvcon ready')
 
 # Process
 params = parseQuery()
@@ -108,4 +110,5 @@ else:
   for t in titles:
     if not title or t['length'] > title['length']:
       title = t
-  plugin.playTitle(title)
+  if title:
+    playTitle(title)
