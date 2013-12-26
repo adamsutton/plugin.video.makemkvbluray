@@ -17,7 +17,7 @@
 #
 
 # Global imports
-import os, sys, time
+import os, sys, time, signal
 import urllib, re
 import xbmc, xbmcaddon
 from subprocess import Popen, PIPE, call
@@ -30,7 +30,8 @@ __addon__     = xbmcaddon.Addon()
 __addonname__ = __addon__.getAddonInfo('name')
 
 # State
-MAKEMKVCON = None
+MAKEMKVCON    = None
+MAKEMKVCONPID = None
 
 #
 # Check binary is installed
@@ -80,9 +81,24 @@ def start ():
   if running():
     plugin.log('makemkvcon already running')
     return
+  
+  # Find existing
+  for d in os.listdir('/proc'):
+    p = os.path.join('/proc', d, 'cmdline')
+    if os.path.isfile(p):
+      try:
+        if 'makemkvcon' in open(p).read():
+          MAKEMKVCONPID = int(d)
+          plugin.log('existing makemkvcon pid %d' % MAKEMKVCONPID)
+          return
+      except Exception, e:
+        plugin.log('ERROR: %s' % e)
+
+  # Start new
   cmd        = plugin.get('makemkvcon_path', 'makemkvcon')
   cmd        = [ cmd, '-r', '--cache=128', 'stream', 'disc:0' ]
   MAKEMKVCON = Popen(cmd, stdout=PIPE, stderr=PIPE)
+  plugin.log('started new makemkvcon')
   return
 
 #
@@ -97,8 +113,9 @@ def getHostPort ():
 # Connect
 #
 def connect ( path = '/' ):
-  plugin.log('connect to %s' % (getHostPort() + path))
-  return urllib.urlopen(getHostPort() + path)
+  url = getHostPort() + path
+  plugin.log('connect to %s' % url)
+  return urllib.urlopen(url)
 
 #
 # Check if stream is ready
