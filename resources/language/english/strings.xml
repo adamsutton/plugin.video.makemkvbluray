@@ -7,6 +7,7 @@
   <string id="50005">Disc %s removed</string>
   <string id="50006">Disc %s timed out</string>
   <string id="50007">No titles found on disc</string>
+  <string id="50008">Disc %s waiting %ds...</string>
 
   <!-- Settings -->
   <string id="51010">General Settings</string>
@@ -18,4 +19,5 @@
   <string id="51031">Auto load</string>
   <string id="51032">Timeout (seconds)</string>
   <string id="51033">Auto start plugin (on disc ready)</string>
+  <string id="51034">Auto play most likely title</string>
 </strings>

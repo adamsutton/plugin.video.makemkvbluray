@@ -47,13 +47,24 @@ def installed ():
   return False
 
 #
+# Check for running process
+#
+def running ():
+  import glob
+  for f in glob.glob('/proc/*/cmdline'):
+    try:
+      cl = open(f).read()
+      if cl.startswith('makemkvcon.bin'):
+        return True
+    except: pass
+  return False
+
+#
 # Kill instances
 #
 def kill ():
-  global MAKEMKVCON
-  if MAKEMKVCON:
-    MAKEMKVCON.kill()
-    MAKEMKVCON = None
+  MAKEMKVCON = None
+  plugin.log('killing makemkvcon')
   cmd = [ 'killall', '-KILL', 'makemkvcon' ]
   call(cmd)
   cmd[2] = cmd[2] + '.bin'
@@ -66,7 +77,8 @@ def kill ():
 #
 def start ():
   global MAKEMKVCON
-  if MAKEMKVCON:
+  if running():
+    plugin.log('makemkvcon already running')
     return
   cmd        = plugin.get('makemkvcon_path', 'makemkvcon')
   cmd        = [ cmd, '-r', '--cache=128', 'stream', 'disc:0' ]
@@ -85,20 +97,19 @@ def getHostPort ():
 # Connect
 #
 def connect ( path = '/' ):
+  plugin.log('connect to %s' % (getHostPort() + path))
   return urllib.urlopen(getHostPort() + path)
 
 #
 # Check if stream is ready
 #
 def ready ():
-  global MAKEMKVCON
-  if not MAKEMKVCON: return False
   try:
     up = connect()
     up.close()
     return True
   except Exception, e:
-    #plugin.log('ERROR: %s' % e)
+    plugin.log('ERROR: %s' % e)
     pass
   return False
 

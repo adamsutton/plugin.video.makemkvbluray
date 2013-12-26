@@ -28,7 +28,7 @@ import xbmc, xbmcaddon, xbmcplugin, xbmcgui
 # Addon info
 __addon__     = xbmcaddon.Addon()
 __cwd__       = __addon__.getAddonInfo('path')
-sys.path.append(xbmc.translatePath(os.path.join(__cwd__, 'resources', 'lib')))
+sys.path.append(xbmc.translatePath(os.path.join(__cwd__, 'lib')))
 
 # Local imports
 import plugin, makemkv, makemkvcon
@@ -70,20 +70,24 @@ def playTitle ( title ):
   xbmc.executebuiltin('PlayMedia("%s")' % title['file0'])
 
 # Check installed
+plugin.log('checking makemkvcon installed')
 if not makemkvcon.installed():
   plugin.notify(plugin.lang(50001))
   sys.exit(1)
 
 # Start
-if not plugin.get('disc_autoload'):
+if not plugin.get_bool('disc_autoload'):
+  plugin.log('start makemkvcon')
   makemkvcon.start()
     
 # Check that service is running
 st = time.time()
 ok = False
 # TODO: dialog
-while (time.time() - st) < int(plugin.get('disc_timeout')):
+while not ok and (time.time() - st) < plugin.get_int('disc_timeout'):
+  plugin.log('waiting for makemkvcon')
   ok = makemkvcon.ready()
+  time.sleep(0.5)
 if not ok:
   plugin.notify(plugin.lang(50006))
   sys.exit(1)
@@ -93,11 +97,12 @@ params = parseQuery()
 
 # Get titles
 titles = makemkvcon.listTitles()
+plugin.log('titles = %s' % str(titles))
 if not titles:
   plugin.notify(plugin.lang(50007))
 
 # List?
-if not plugin.get('disc_autoplay'):
+if not plugin.get_bool('disc_autoplay'):
   for t in titles:
     addTitle(t)
   xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -108,4 +113,4 @@ else:
   for t in titles:
     if not title or t['length'] > title['length']:
       title = t
-  plugin.playTitle(title)
+  playTitle(title)

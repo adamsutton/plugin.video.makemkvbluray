@@ -27,7 +27,7 @@ import xbmc, xbmcaddon
 # Addon info
 __addon__     = xbmcaddon.Addon()
 __cwd__       = __addon__.getAddonInfo('path')
-sys.path.append(xbmc.translatePath(os.path.join(__cwd__, 'resources', 'lib')))
+sys.path.append(xbmc.translatePath(os.path.join(__cwd__, 'lib')))
 
 # Local imports
 import plugin, makemkv, makemkvcon
@@ -40,13 +40,17 @@ BDDIR = 'BDMV'
 if not makemkvcon.installed():
   plugin.notify(plugin.lang(50001))
 
+# Config
+for k in [ 'license_key', 'license_beta_auto', 'license_beta_period', 'disc_autoload', 'disc_autostart', 'disc_timeout' ]:
+  v = plugin.get(k)
+  plugin.log('config %s => %s' % (k, v))
+
 # Service loop
 key_checked  = 0
 disc_current = None
 disc_started = 0
 disc_ready   = False
 while not xbmc.abortRequested:
-  plugin.log('run')
 
   # Update fixed key
   key = plugin.get('license_key')
@@ -54,8 +58,8 @@ while not xbmc.abortRequested:
     makemkv.set(makemkv.APP_KEY, key)
 
   # Check for beta key
-  elif plugin.get('license_beta_auto'):
-    period = int(plugin.get('license_beta_period')) * 3600
+  elif plugin.get_bool('license_beta_auto'):
+    period = plugin.get_int('license_beta_period') * 3600
     now    = time.time()
     if now - key_checked > period:
       if makemkv.updateLicense():
@@ -72,18 +76,23 @@ while not xbmc.abortRequested:
       disc_ready   = False
 
   # Check for disc
-  if plugin.get('disc_autoload') and not disc_ready:
+  if plugin.get_bool('disc_autoload') and not disc_ready:
 
     # Wait
     if disc_current:
       if makemkvcon.ready():
         disc_ready = True
         plugin.notify(plugin.lang(50004) % disc_current)
-        if plugin.get('disc_autostart'):
+        if plugin.get_bool('disc_autostart'):
           plugin.start()
-      elif (time.time() - disc_started) > int(plugin.get('disc_timeout')):
-        plugin.notify(plugin.lang(50006) % disc_current)
-        disc_ready = True # stop watching
+      else:
+        r = plugin.get_int('disc_timeout') - (time.time() - disc_started)
+        if r <= 0:
+          plugin.notify(plugin.lang(50006) % disc_current)
+          disc_ready = True # stop watching
+          # TODO: try and restart if first failure
+        else:
+          plugin.notify(plugin.lang(50008) % (disc_current, r))
 
     # Check for new
     else:
@@ -99,5 +108,5 @@ while not xbmc.abortRequested:
             plugin.log('ERROR: %s' % e)
           break
 
-    # Wait
-  xbmc.sleep(5)
+  # Wait
+  time.sleep(5)

@@ -37,7 +37,7 @@ def log ( msg ):
 #
 # Notify XBMC user
 #
-def notify ( msg, image = "", timeout = 3000 ):
+def notify ( msg, image = "", timeout = 5000 ):
   if not image:
     image = os.path.join(__cwd__, 'icon.png')
   xbmc.executebuiltin('Notification("%s", "%s", "%d", "%s")' % (__addonname__, msg, timeout, image))
@@ -49,6 +49,18 @@ def get ( key, default = None ):
   val = __addon__.getSetting(key)
   if val is None or val == '': val = default
   return val
+
+def get_int ( key, default = None ):
+  v = get(key, default)
+  if v is not None:
+    v = int(v)
+  return v
+
+def get_bool ( key, default = None ):
+  v = get(key, default)
+  if v is not None:
+    v = v.lower() in [ "1", "yes", "true", "y", "t" ]
+  return v
 
 #
 # Get language string
